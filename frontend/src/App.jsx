@@ -92,11 +92,10 @@ function App() {
   }
 
   async function handleRegister(payload) {
-    const registeredUser = await apiPost('/register', payload);
-    setUser(registeredUser);
-    localStorage.setItem('barangay_user', JSON.stringify(registeredUser));
-    setPortal('resident');
-    setNotice('');
+    await apiPost('/register', payload);
+    setNotice('Registration successful. Please log in to continue.');
+    setAuthMode('login');
+    setPortal('auth');
   }
 
   function logout() {
