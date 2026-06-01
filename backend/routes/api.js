@@ -32,6 +32,17 @@ router.get('/users', async (req, res) => {
   }
 });
 
+// Get resident count quickly
+router.get('/residents-count', async (req, res) => {
+  try {
+    const result = await db.query('select count(*) as total from residents');
+    res.json({ total: parseInt(result.rows[0].total, 10) });
+  } catch (error) {
+    console.error('Residents Count Error:', error.message);
+    res.status(500).json({ message: error.message });
+  }
+});
+
 router.post('/users', async (req, res) => {
   const { firstname, lastname, username, email, password, role = 'resident' } = req.body;
 
@@ -93,6 +104,7 @@ router.post('/register', async (req, res) => {
 
     res.status(201).json({ ...user, resident: residentResult.rows[0] });
   } catch (error) {
+    console.error('Register error:', error.message);
     res.status(500).json({ message: error.message });
   }
 });
@@ -316,3 +328,4 @@ function verifyPassword(password, storedPassword) {
 }
 
 module.exports = router;
+
