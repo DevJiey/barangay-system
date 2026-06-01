@@ -249,6 +249,33 @@ router.post('/document-requests', async (req, res) => {
   }
 });
 
+router.put('/document-requests/:id', async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  if (!status) {
+    return res.status(400).json({ message: 'status is required' });
+  }
+
+  try {
+    const result = await db.query(
+      `update document_requests
+       set status = $1
+       where id = $2
+       returning *`,
+      [status, id],
+    );
+
+    if (!result.rows[0]) {
+      return res.status(404).json({ message: 'Document request not found' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 router.get('/incident-reports', async (req, res) => {
   try {
     const { resident_id } = req.query;
@@ -284,6 +311,33 @@ router.post('/incident-reports', async (req, res) => {
       [resident_id || null, incident_type, description, location, photo || null, status],
     );
     res.status(201).json(result.rows[0]);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.put('/incident-reports/:id', async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  if (!status) {
+    return res.status(400).json({ message: 'status is required' });
+  }
+
+  try {
+    const result = await db.query(
+      `update incident_reports
+       set status = $1
+       where id = $2
+       returning *`,
+      [status, id],
+    );
+
+    if (!result.rows[0]) {
+      return res.status(404).json({ message: 'Incident report not found' });
+    }
+
+    res.json(result.rows[0]);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -900,6 +900,52 @@ td {
   color: var(--purple);
 }
 
+.badge-rejected {
+  background: var(--red-light);
+  color: #991b1b;
+}
+
+.badge-for-requirements,
+.badge-resolved {
+  background: var(--blue-light);
+  color: var(--blue);
+}
+
+.review-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.review-details {
+  display: grid;
+  gap: 10px;
+}
+
+.request-guidance {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  background: var(--gray-light);
+}
+
+.request-guidance strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.request-guidance p {
+  margin: 0;
+  color: var(--text-2);
+  line-height: 1.5;
+}
+
+.action-row,
+.table-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

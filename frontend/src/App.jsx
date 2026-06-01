@@ -626,8 +626,8 @@ function AdminPortal({ activePage, data, logout, refreshData, setActivePage, use
           {activePage === 'Dashboard' && <AdminDashboard data={data} />}
           {activePage === 'Residents' && <ResidentsAdmin residents={data.residents} />}
           {activePage === 'Households' && <SimpleAdmin rows={data.households} title="Households" icon="ti ti-home" />}
-          {activePage === 'Doc Requests' && <DocRequestsAdmin requests={data.requests} />}
-          {activePage === 'Incidents' && <IncidentsAdmin incidents={data.incidents} />}
+          {activePage === 'Doc Requests' && <DocRequestsAdmin refreshData={refreshData} requests={data.requests} />}
+          {activePage === 'Incidents' && <IncidentsAdmin incidents={data.incidents} refreshData={refreshData} />}
           {activePage === 'Announcements' && <AnnouncementsAdmin announcements={data.announcements} />}
           {activePage === 'Officials' && <OfficialsGrid officials={data.officials} />}
           {activePage === 'Reports' && <ReportsAdmin data={data} />}
@@ -680,35 +680,27 @@ function ResidentsAdmin({ residents }) {
   );
 }
 
-function DocRequestsAdmin({ requests }) {
-  const [form, setForm] = useState({ resident_id: '', document_type: 'Barangay Clearance', purpose: '' });
+function DocRequestsAdmin({ refreshData, requests }) {
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [status, setStatus] = useState('Under Review');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
-  function validateForm() {
-    if (!form.resident_id?.trim()) return 'Resident ID is required';
-    if (isNaN(parseInt(form.resident_id, 10))) return 'Resident ID must be a number';
-    if (!form.document_type?.trim()) return 'Document type is required';
-    if (!form.purpose?.trim()) return 'Purpose is required';
-    if (form.purpose.trim().length < 5) return 'Purpose must be at least 5 characters';
-    return '';
+  function reviewRequest(request) {
+    setSelectedRequest(request);
+    setStatus(request.status || 'Under Review');
+    setError('');
   }
 
-  async function submitRequest() {
+  async function updateRequestStatus(nextStatus = status) {
+    if (!selectedRequest) return;
     setError('');
-    const validationError = validateForm();
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
     setSaving(true);
     try {
-      await apiPost('/document-requests', {
-        ...form,
-        resident_id: parseInt(form.resident_id, 10),
-      });
-      setForm({ resident_id: '', document_type: 'Barangay Clearance', purpose: '' });
-      window.location.reload();
+      const updatedRequest = await apiPut(`/document-requests/${selectedRequest.id}`, { status: nextStatus });
+      setSelectedRequest(updatedRequest);
+      setStatus(updatedRequest.status || nextStatus);
+      await refreshData();
     } catch (error) {
       setError(`Error: ${error.message}`);
     } finally {
@@ -719,75 +711,64 @@ function DocRequestsAdmin({ requests }) {
   return (
     <div className="grid-2">
       <div className="card">
-        <CardHeader title="Create Request" icon="ti ti-file-plus" />
-        <div className="card-body">
-          {error && <p className="form-error">{error}</p>}
-          <FormLabel label="Resident ID">
-            <input 
-              type="number" 
-              value={form.resident_id} 
-              onChange={(e) => setForm({ ...form, resident_id: e.target.value })} 
-              placeholder="Enter resident ID"
-            />
-          </FormLabel>
-          <FormLabel label="Document Type">
-            <select value={form.document_type} onChange={(e) => setForm({ ...form, document_type: e.target.value })}>
-              <option>Barangay Clearance</option>
-              <option>Certificate of Residency</option>
-              <option>Certificate of Indigency</option>
-            </select>
-          </FormLabel>
-          <FormLabel label="Purpose">
-            <textarea 
-              rows="4" 
-              value={form.purpose} 
-              onChange={(e) => setForm({ ...form, purpose: e.target.value })}
-              placeholder="Request purpose (min. 5 characters)"
-            />
-          </FormLabel>
-          <button className="btn btn-primary" disabled={saving} onClick={submitRequest} type="button">
-            {saving ? 'Creating...' : 'Create Request'}
-          </button>
+        <CardHeader title="Review Request" icon="ti ti-clipboard-check" />
+        <div className="card-body review-panel">
+          {!selectedRequest && <EmptyState icon="ti ti-hand-click" text="Select a request to review." />}
+          {selectedRequest && (
+            <>
+              {error && <p className="form-error">{error}</p>}
+              <div className="review-details">
+                <Field label="Reference" value={`REQ-${String(selectedRequest.id).padStart(4, '0')}`} />
+                <Field label="Resident ID" value={selectedRequest.resident_id || 'No resident linked'} />
+                <Field label="Document" value={selectedRequest.document_type || '-'} />
+                <Field label="Purpose" value={selectedRequest.purpose || 'No purpose provided'} />
+              </div>
+              <FormLabel label="Status">
+                <select value={status} onChange={(event) => setStatus(event.target.value)}>
+                  <option>Pending</option>
+                  <option>Under Review</option>
+                  <option>For Requirements</option>
+                  <option>Approved</option>
+                  <option>Released</option>
+                  <option>Rejected</option>
+                </select>
+              </FormLabel>
+              <div className="request-guidance">
+                <strong>Document release note</strong>
+                <p>
+                  Kapag kumpleto na ang requirements, set to Approved. Kapag naibigay na sa resident ang certificate/clearance, set to Released.
+                </p>
+              </div>
+              <div className="action-row">
+                <button className="btn btn-primary" disabled={saving} onClick={() => updateRequestStatus()} type="button">
+                  {saving ? 'Saving...' : 'Save Status'}
+                </button>
+                <button className="btn btn-secondary" disabled={saving} onClick={() => updateRequestStatus('Released')} type="button">
+                  Mark Released
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
       <div className="card">
         <CardHeader title="All Requests" icon="ti ti-list-check" />
-        <RequestTable requests={requests} admin />
+        <RequestTable onReview={reviewRequest} requests={requests} admin />
       </div>
     </div>
   );
 }
 
-function IncidentsAdmin({ incidents }) {
-  const [form, setForm] = useState({ resident_id: '', incident_type: '', location: '', description: '' });
+function IncidentsAdmin({ incidents, refreshData }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
-  function validateForm() {
-    if (!form.incident_type?.trim()) return 'Incident type is required';
-    if (!form.location?.trim()) return 'Location is required';
-    if (form.incident_type.trim().length < 3) return 'Incident type must be at least 3 characters';
-    if (form.location.trim().length < 3) return 'Location must be at least 3 characters';
-    if (!form.description?.trim()) return 'Description is required';
-    if (form.description.trim().length < 10) return 'Description must be at least 10 characters';
-    return '';
-  }
-
-  async function submitIncident() {
+  async function updateIncidentStatus(incidentId, status) {
     setError('');
-    const validationError = validateForm();
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
     setSaving(true);
     try {
-      await apiPost('/incident-reports', {
-        ...form,
-        resident_id: form.resident_id ? parseInt(form.resident_id, 10) : null,
-      });
-      setForm({ resident_id: '', incident_type: '', location: '', description: '' });
-      window.location.reload();
+      await apiPut(`/incident-reports/${incidentId}`, { status });
+      await refreshData();
     } catch (error) {
       setError(`Error: ${error.message}`);
     } finally {
@@ -796,52 +777,30 @@ function IncidentsAdmin({ incidents }) {
   }
 
   return (
-    <div className="grid-2">
-      <div className="card">
-        <CardHeader title="Report Incident" icon="ti ti-alert-circle" />
-        <div className="card-body">
-          {error && <p className="form-error">{error}</p>}
-          <FormLabel label="Resident ID (Optional)">
-            <input 
-              type="number" 
-              value={form.resident_id} 
-              onChange={(e) => setForm({ ...form, resident_id: e.target.value })} 
-              placeholder="Enter resident ID or leave blank"
-            />
-          </FormLabel>
-          <FormLabel label="Incident Type">
-            <input 
-              value={form.incident_type} 
-              onChange={(e) => setForm({ ...form, incident_type: e.target.value })}
-              placeholder="e.g. Theft, Noise Complaint, etc."
-            />
-          </FormLabel>
-          <FormLabel label="Location">
-            <input 
-              value={form.location} 
-              onChange={(e) => setForm({ ...form, location: e.target.value })}
-              placeholder="Where did it happen?"
-            />
-          </FormLabel>
-          <FormLabel label="Description">
-            <textarea 
-              rows="4" 
-              value={form.description} 
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-              placeholder="Detailed description (min. 10 characters)"
-            />
-          </FormLabel>
-          <button className="btn btn-primary" disabled={saving} onClick={submitIncident} type="button">
-            {saving ? 'Reporting...' : 'Report Incident'}
-          </button>
-        </div>
-      </div>
-      <div className="card">
-        <CardHeader title="All Reports" icon="ti ti-list" />
+    <div className="card">
+      <CardHeader title="Incident Reports" icon="ti ti-list" />
+      <div className="card-body">
+        {error && <p className="form-error">{error}</p>}
         <div className="table-wrap">
           <table>
-            <thead><tr><th>ID</th><th>Type</th><th>Location</th><th>Status</th><th>Date</th></tr></thead>
-            <tbody>{incidents.map((item) => <tr key={item.id}><td>{item.id}</td><td>{item.incident_type}</td><td>{item.location || '-'}</td><td><Badge text={item.status || 'Pending'} /></td><td>{formatDate(item.created_at)}</td></tr>)}</tbody>
+            <thead><tr><th>ID</th><th>Type</th><th>Location</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+            <tbody>
+              {incidents.map((item) => (
+                <tr key={item.id}>
+                  <td>INC-{String(item.id).padStart(4, '0')}</td>
+                  <td>{item.incident_type}</td>
+                  <td>{item.location || '-'}</td>
+                  <td><Badge text={item.status || 'Pending'} /></td>
+                  <td>{formatDate(item.created_at)}</td>
+                  <td>
+                    <div className="table-actions">
+                      <button className="btn btn-secondary btn-sm" disabled={saving} onClick={() => updateIncidentStatus(item.id, 'Under Review')} type="button">Review</button>
+                      <button className="btn btn-secondary btn-sm" disabled={saving} onClick={() => updateIncidentStatus(item.id, 'Resolved')} type="button">Resolve</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
           </table>
         </div>
         {!incidents.length && <EmptyState icon="ti ti-alert-triangle" text="No incident reports yet." />}
@@ -947,7 +906,7 @@ function OfficialsGrid({ officials }) {
   );
 }
 
-function RequestTable({ admin = false, requests = [] }) {
+function RequestTable({ admin = false, onReview, requests = [] }) {
   return (
     <div className="table-wrap">
       <table>
@@ -959,7 +918,13 @@ function RequestTable({ admin = false, requests = [] }) {
               <td>{request.document_type}</td>
               <td><Badge text={request.status || 'Pending'} /></td>
               <td>{formatDate(request.created_at) || '-'}</td>
-              {admin && <td><button className="btn btn-secondary btn-sm" type="button">Review</button></td>}
+              {admin && (
+                <td>
+                  <button className="btn btn-secondary btn-sm" onClick={() => onReview?.(request)} type="button">
+                    Review
+                  </button>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
@@ -1028,6 +993,21 @@ async function apiGet(path) {
 async function apiPost(path, body) {
   const response = await fetch(`${API_BASE}${path}`, {
     method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.message || `API error: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+async function apiPut(path, body) {
+  const response = await fetch(`${API_BASE}${path}`, {
+    method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
