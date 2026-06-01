@@ -849,33 +849,6 @@ function IncidentsAdmin({ incidents }) {
     </div>
   );
 }
-          </FormLabel>
-          <FormLabel label="Description">
-            <textarea 
-              rows="4" 
-              value={form.description} 
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-              placeholder="Detailed description"
-            />
-          </FormLabel>
-          <button className="btn btn-primary" disabled={saving} onClick={submitIncident} type="button">
-            {saving ? 'Reporting...' : 'Report Incident'}
-          </button>
-        </div>
-      </div>
-      <div className="card">
-        <CardHeader title="All Reports" icon="ti ti-list" />
-        <div className="table-wrap">
-          <table>
-            <thead><tr><th>ID</th><th>Type</th><th>Location</th><th>Status</th><th>Date</th></tr></thead>
-            <tbody>{incidents.map((item) => <tr key={item.id}><td>{item.id}</td><td>{item.incident_type}</td><td>{item.location || '-'}</td><td><Badge text={item.status || 'Pending'} /></td><td>{formatDate(item.created_at)}</td></tr>)}</tbody>
-          </table>
-        </div>
-        {!incidents.length && <EmptyState icon="ti ti-alert-triangle" text="No incident reports yet." />}
-      </div>
-    </div>
-  );
-}
 
 function AnnouncementsAdmin({ announcements }) {
   return <div className="card"><CardHeader title="Manage Announcements" icon="ti ti-speakerphone" /><div className="card-body"><AnnouncementGrid announcements={announcements} compact /></div></div>;
