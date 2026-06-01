@@ -16,12 +16,18 @@ const adminPages = [
 ];
 
 function App() {
-  const [portal, setPortal] = useState('public');
+  const storedUser = readStoredUser();
+  const [portal, setPortal] = useState(() => {
+    if (storedUser) {
+      return storedUser.role === 'admin' ? 'admin' : 'resident';
+    }
+    return 'public';
+  });
   const [publicPage, setPublicPage] = useState('Home');
   const [residentPage, setResidentPage] = useState('Dashboard');
   const [adminPage, setAdminPage] = useState('Dashboard');
   const [authMode, setAuthMode] = useState('login');
-  const [user, setUser] = useState(() => readStoredUser());
+  const [user, setUser] = useState(storedUser);
   const [data, setData] = useState(emptyData);
   const [notice, setNotice] = useState('');
 
@@ -291,10 +297,46 @@ function AuthPage({ mode, onBack, onLogin, onRegister, setMode, target }) {
   const [error, setError] = useState('');
   const isRegister = mode === 'register' && target !== 'admin';
 
+  function validateForm() {
+    if (isRegister) {
+      // Registration validation
+      if (!form.firstname?.trim()) return 'First name is required';
+      if (!form.lastname?.trim()) return 'Last name is required';
+      if (form.firstname.trim().length < 2) return 'First name must be at least 2 characters';
+      if (form.lastname.trim().length < 2) return 'Last name must be at least 2 characters';
+      
+      if (!form.username?.trim()) return 'Username is required';
+      if (form.username.trim().length < 3) return 'Username must be at least 3 characters';
+      if (!/^[a-zA-Z0-9_]+$/.test(form.username)) return 'Username can only contain letters, numbers, and underscores';
+      
+      if (!form.email?.trim()) return 'Email is required';
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) return 'Invalid email format';
+      
+      if (!form.password) return 'Password is required';
+      if (form.password.length < 6) return 'Password must be at least 6 characters';
+      
+      if (form.contact_no && !/^[\d\s\-\+\(\)]+$/.test(form.contact_no)) return 'Invalid phone number format';
+    } else {
+      // Login validation
+      if (!form.email?.trim()) return 'Email or username is required';
+      if (!form.password) return 'Password is required';
+      if (form.password.length < 6) return 'Invalid credentials';
+    }
+    return '';
+  }
+
   async function submit(event) {
     event.preventDefault();
     setSaving(true);
     setError('');
+    
+    const validationError = validateForm();
+    if (validationError) {
+      setError(validationError);
+      setSaving(false);
+      return;
+    }
+
     try {
       if (isRegister) await onRegister(form);
       else await onLogin({ identifier: form.email, password: form.password });
@@ -319,7 +361,7 @@ function AuthPage({ mode, onBack, onLogin, onRegister, setMode, target }) {
           <p>
             {isRegister
               ? 'Register as a resident to request documents and report incidents online.'
-              : 'Login once and the system will open the correct portal based on your account role.'}
+              : 'Login once and the system will open for you.'}
           </p>
         </div>
         <div className="auth-panel">
@@ -330,24 +372,24 @@ function AuthPage({ mode, onBack, onLogin, onRegister, setMode, target }) {
           <div className="form-grid">
           {isRegister && (
             <>
-              <FormLabel label="First Name"><input required value={form.firstname} onChange={(e) => setForm({ ...form, firstname: e.target.value })} /></FormLabel>
-              <FormLabel label="Last Name"><input required value={form.lastname} onChange={(e) => setForm({ ...form, lastname: e.target.value })} /></FormLabel>
-              <FormLabel label="Username"><input required value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} /></FormLabel>
+              <FormLabel label="First Name"><input required value={form.firstname} onChange={(e) => setForm({ ...form, firstname: e.target.value })} placeholder="John" /></FormLabel>
+              <FormLabel label="Last Name"><input required value={form.lastname} onChange={(e) => setForm({ ...form, lastname: e.target.value })} placeholder="Doe" /></FormLabel>
+              <FormLabel label="Username"><input required value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} placeholder="johndoe123" /></FormLabel>
             </>
           )}
           <FormLabel label={isRegister ? 'Email' : 'Email or username'}>
-            <input required type={isRegister ? 'email' : 'text'} value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+            <input required type="text" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder={isRegister ? 'john@example.com' : 'email or username'} />
           </FormLabel>
-          <FormLabel label="Password"><input required type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} /></FormLabel>
+          <FormLabel label="Password"><input required type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder={isRegister ? 'Min. 6 characters' : '••••••'} /></FormLabel>
           {isRegister && (
             <>
-              <FormLabel label="House No."><input value={form.house_no} onChange={(e) => setForm({ ...form, house_no: e.target.value })} /></FormLabel>
-              <FormLabel label="Street / Purok"><input value={form.street} onChange={(e) => setForm({ ...form, street: e.target.value })} /></FormLabel>
+              <FormLabel label="House No."><input value={form.house_no} onChange={(e) => setForm({ ...form, house_no: e.target.value })} placeholder="123-A" /></FormLabel>
+              <FormLabel label="Street / Purok"><input value={form.street} onChange={(e) => setForm({ ...form, street: e.target.value })} placeholder="Main Street" /></FormLabel>
               <FormLabel label="Birthdate"><input type="date" value={form.birthdate} onChange={(e) => setForm({ ...form, birthdate: e.target.value })} /></FormLabel>
               <FormLabel label="Gender"><select value={form.gender} onChange={(e) => setForm({ ...form, gender: e.target.value })}><option>Male</option><option>Female</option></select></FormLabel>
-              <FormLabel label="Contact No."><input value={form.contact_no} onChange={(e) => setForm({ ...form, contact_no: e.target.value })} /></FormLabel>
+              <FormLabel label="Contact No."><input value={form.contact_no} onChange={(e) => setForm({ ...form, contact_no: e.target.value })} placeholder="09XX-XXX-XXXX or (02) 8123-4567" /></FormLabel>
               <FormLabel label="Civil Status"><select value={form.civil_status} onChange={(e) => setForm({ ...form, civil_status: e.target.value })}><option>Single</option><option>Married</option><option>Widowed</option><option>Separated</option></select></FormLabel>
-              <FormLabel label="Occupation"><input value={form.occupation} onChange={(e) => setForm({ ...form, occupation: e.target.value })} /></FormLabel>
+              <FormLabel label="Occupation"><input value={form.occupation} onChange={(e) => setForm({ ...form, occupation: e.target.value })} placeholder="e.g. Engineer, Teacher" /></FormLabel>
             </>
           )}
           {error && <p className="form-error">{error}</p>}
@@ -442,8 +484,26 @@ function ResidentProfile({ user }) {
 function ResidentRequests({ onCreated, requests, user }) {
   const [form, setForm] = useState({ document_type: 'Barangay Clearance', purpose: '' });
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  function validateForm() {
+    if (!form.document_type?.trim()) return 'Document type is required';
+    if (!form.purpose?.trim()) return 'Purpose is required';
+    if (form.purpose.trim().length < 5) return 'Purpose must be at least 5 characters';
+    return '';
+  }
 
   async function submitRequest() {
+    setError('');
+    const validationError = validateForm();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+    if (!user.resident?.id) {
+      setError('Your resident profile is not complete. Please update your profile first.');
+      return;
+    }
     setSaving(true);
     try {
       await apiPost('/document-requests', {
@@ -452,6 +512,8 @@ function ResidentRequests({ onCreated, requests, user }) {
       });
       setForm({ document_type: 'Barangay Clearance', purpose: '' });
       await onCreated();
+    } catch (err) {
+      setError(err.message);
     } finally {
       setSaving(false);
     }
@@ -462,6 +524,7 @@ function ResidentRequests({ onCreated, requests, user }) {
       <div className="card">
         <CardHeader title="Request Document" icon="ti ti-file-plus" />
         <div className="card-body">
+          {error && <p className="form-error">{error}</p>}
           <FormLabel label="Document Type">
             <select onChange={(event) => setForm({ ...form, document_type: event.target.value })} value={form.document_type}>
               <option>Barangay Clearance</option>
@@ -470,7 +533,7 @@ function ResidentRequests({ onCreated, requests, user }) {
             </select>
           </FormLabel>
           <FormLabel label="Purpose">
-            <textarea onChange={(event) => setForm({ ...form, purpose: event.target.value })} rows="4" value={form.purpose} />
+            <textarea onChange={(event) => setForm({ ...form, purpose: event.target.value })} rows="4" value={form.purpose} placeholder="Why do you need this document?" />
           </FormLabel>
           <button className="btn btn-primary" disabled={saving} onClick={submitRequest} type="button">
             {saving ? 'Submitting...' : 'Submit Request'}
@@ -488,8 +551,14 @@ function ResidentRequests({ onCreated, requests, user }) {
 function IncidentForm({ onCreated, user }) {
   const [form, setForm] = useState({ incident_type: '', location: '', description: '' });
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
 
   async function submitIncident() {
+    setError('');
+    if (!form.incident_type || !form.location) {
+      setError('Incident type and location are required.');
+      return;
+    }
     setSaving(true);
     try {
       await apiPost('/incident-reports', {
@@ -498,6 +567,8 @@ function IncidentForm({ onCreated, user }) {
       });
       setForm({ incident_type: '', location: '', description: '' });
       await onCreated();
+    } catch (err) {
+      setError(err.message);
     } finally {
       setSaving(false);
     }
@@ -507,9 +578,10 @@ function IncidentForm({ onCreated, user }) {
     <div className="card">
       <CardHeader title="Report an Incident" icon="ti ti-alert-circle" />
       <div className="card-body form-grid">
-        <FormLabel label="Incident Type"><input onChange={(event) => setForm({ ...form, incident_type: event.target.value })} value={form.incident_type} /></FormLabel>
-        <FormLabel label="Location"><input onChange={(event) => setForm({ ...form, location: event.target.value })} value={form.location} /></FormLabel>
-        <FormLabel label="Description"><textarea onChange={(event) => setForm({ ...form, description: event.target.value })} rows="5" value={form.description} /></FormLabel>
+        {error && <p className="form-error">{error}</p>}
+        <FormLabel label="Incident Type"><input onChange={(event) => setForm({ ...form, incident_type: event.target.value })} value={form.incident_type} placeholder="e.g. Theft, Noise Complaint" /></FormLabel>
+        <FormLabel label="Location"><input onChange={(event) => setForm({ ...form, location: event.target.value })} value={form.location} placeholder="Where did it happen?" /></FormLabel>
+        <FormLabel label="Description"><textarea onChange={(event) => setForm({ ...form, description: event.target.value })} rows="5" value={form.description} placeholder="Detailed description" /></FormLabel>
         <button className="btn btn-primary" disabled={saving} onClick={submitIncident} type="button">
           {saving ? 'Submitting...' : 'Submit Report'}
         </button>
@@ -609,20 +681,198 @@ function ResidentsAdmin({ residents }) {
 }
 
 function DocRequestsAdmin({ requests }) {
-  return <div className="card"><CardHeader title="Document Requests" icon="ti ti-file-description" /><RequestTable requests={requests} admin /></div>;
+  const [form, setForm] = useState({ resident_id: '', document_type: 'Barangay Clearance', purpose: '' });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  function validateForm() {
+    if (!form.resident_id?.trim()) return 'Resident ID is required';
+    if (isNaN(parseInt(form.resident_id, 10))) return 'Resident ID must be a number';
+    if (!form.document_type?.trim()) return 'Document type is required';
+    if (!form.purpose?.trim()) return 'Purpose is required';
+    if (form.purpose.trim().length < 5) return 'Purpose must be at least 5 characters';
+    return '';
+  }
+
+  async function submitRequest() {
+    setError('');
+    const validationError = validateForm();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+    setSaving(true);
+    try {
+      await apiPost('/document-requests', {
+        ...form,
+        resident_id: parseInt(form.resident_id, 10),
+      });
+      setForm({ resident_id: '', document_type: 'Barangay Clearance', purpose: '' });
+      window.location.reload();
+    } catch (error) {
+      setError(`Error: ${error.message}`);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="grid-2">
+      <div className="card">
+        <CardHeader title="Create Request" icon="ti ti-file-plus" />
+        <div className="card-body">
+          {error && <p className="form-error">{error}</p>}
+          <FormLabel label="Resident ID">
+            <input 
+              type="number" 
+              value={form.resident_id} 
+              onChange={(e) => setForm({ ...form, resident_id: e.target.value })} 
+              placeholder="Enter resident ID"
+            />
+          </FormLabel>
+          <FormLabel label="Document Type">
+            <select value={form.document_type} onChange={(e) => setForm({ ...form, document_type: e.target.value })}>
+              <option>Barangay Clearance</option>
+              <option>Certificate of Residency</option>
+              <option>Certificate of Indigency</option>
+            </select>
+          </FormLabel>
+          <FormLabel label="Purpose">
+            <textarea 
+              rows="4" 
+              value={form.purpose} 
+              onChange={(e) => setForm({ ...form, purpose: e.target.value })}
+              placeholder="Request purpose (min. 5 characters)"
+            />
+          </FormLabel>
+          <button className="btn btn-primary" disabled={saving} onClick={submitRequest} type="button">
+            {saving ? 'Creating...' : 'Create Request'}
+          </button>
+        </div>
+      </div>
+      <div className="card">
+        <CardHeader title="All Requests" icon="ti ti-list-check" />
+        <RequestTable requests={requests} admin />
+      </div>
+    </div>
+  );
 }
 
 function IncidentsAdmin({ incidents }) {
+  const [form, setForm] = useState({ resident_id: '', incident_type: '', location: '', description: '' });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  function validateForm() {
+    if (!form.incident_type?.trim()) return 'Incident type is required';
+    if (!form.location?.trim()) return 'Location is required';
+    if (form.incident_type.trim().length < 3) return 'Incident type must be at least 3 characters';
+    if (form.location.trim().length < 3) return 'Location must be at least 3 characters';
+    if (!form.description?.trim()) return 'Description is required';
+    if (form.description.trim().length < 10) return 'Description must be at least 10 characters';
+    return '';
+  }
+
+  async function submitIncident() {
+    setError('');
+    const validationError = validateForm();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+    setSaving(true);
+    try {
+      await apiPost('/incident-reports', {
+        ...form,
+        resident_id: form.resident_id ? parseInt(form.resident_id, 10) : null,
+      });
+      setForm({ resident_id: '', incident_type: '', location: '', description: '' });
+      window.location.reload();
+    } catch (error) {
+      setError(`Error: ${error.message}`);
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
-    <div className="card">
-      <CardHeader title="Incident Reports" icon="ti ti-alert-triangle" />
-      <div className="table-wrap">
-        <table>
-          <thead><tr><th>ID</th><th>Type</th><th>Location</th><th>Status</th><th>Date</th></tr></thead>
-          <tbody>{incidents.map((item) => <tr key={item.id}><td>{item.id}</td><td>{item.incident_type}</td><td>{item.location || '-'}</td><td><Badge text={item.status || 'Pending'} /></td><td>{formatDate(item.created_at)}</td></tr>)}</tbody>
-        </table>
+    <div className="grid-2">
+      <div className="card">
+        <CardHeader title="Report Incident" icon="ti ti-alert-circle" />
+        <div className="card-body">
+          {error && <p className="form-error">{error}</p>}
+          <FormLabel label="Resident ID (Optional)">
+            <input 
+              type="number" 
+              value={form.resident_id} 
+              onChange={(e) => setForm({ ...form, resident_id: e.target.value })} 
+              placeholder="Enter resident ID or leave blank"
+            />
+          </FormLabel>
+          <FormLabel label="Incident Type">
+            <input 
+              value={form.incident_type} 
+              onChange={(e) => setForm({ ...form, incident_type: e.target.value })}
+              placeholder="e.g. Theft, Noise Complaint, etc."
+            />
+          </FormLabel>
+          <FormLabel label="Location">
+            <input 
+              value={form.location} 
+              onChange={(e) => setForm({ ...form, location: e.target.value })}
+              placeholder="Where did it happen?"
+            />
+          </FormLabel>
+          <FormLabel label="Description">
+            <textarea 
+              rows="4" 
+              value={form.description} 
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              placeholder="Detailed description (min. 10 characters)"
+            />
+          </FormLabel>
+          <button className="btn btn-primary" disabled={saving} onClick={submitIncident} type="button">
+            {saving ? 'Reporting...' : 'Report Incident'}
+          </button>
+        </div>
       </div>
-      {!incidents.length && <EmptyState icon="ti ti-alert-triangle" text="No incident reports yet." />}
+      <div className="card">
+        <CardHeader title="All Reports" icon="ti ti-list" />
+        <div className="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Type</th><th>Location</th><th>Status</th><th>Date</th></tr></thead>
+            <tbody>{incidents.map((item) => <tr key={item.id}><td>{item.id}</td><td>{item.incident_type}</td><td>{item.location || '-'}</td><td><Badge text={item.status || 'Pending'} /></td><td>{formatDate(item.created_at)}</td></tr>)}</tbody>
+          </table>
+        </div>
+        {!incidents.length && <EmptyState icon="ti ti-alert-triangle" text="No incident reports yet." />}
+      </div>
+    </div>
+  );
+}
+          </FormLabel>
+          <FormLabel label="Description">
+            <textarea 
+              rows="4" 
+              value={form.description} 
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              placeholder="Detailed description"
+            />
+          </FormLabel>
+          <button className="btn btn-primary" disabled={saving} onClick={submitIncident} type="button">
+            {saving ? 'Reporting...' : 'Report Incident'}
+          </button>
+        </div>
+      </div>
+      <div className="card">
+        <CardHeader title="All Reports" icon="ti ti-list" />
+        <div className="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Type</th><th>Location</th><th>Status</th><th>Date</th></tr></thead>
+            <tbody>{incidents.map((item) => <tr key={item.id}><td>{item.id}</td><td>{item.incident_type}</td><td>{item.location || '-'}</td><td><Badge text={item.status || 'Pending'} /></td><td>{formatDate(item.created_at)}</td></tr>)}</tbody>
+          </table>
+        </div>
+        {!incidents.length && <EmptyState icon="ti ti-alert-triangle" text="No incident reports yet." />}
+      </div>
     </div>
   );
 }
