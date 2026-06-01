@@ -1115,31 +1115,62 @@ textarea:focus {
     overflow-x: auto;
   }
 
-  .grid-4,
-  .grid-3,
+  .grid-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .grid-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .grid-2,
   .form-grid {
     grid-template-columns: 1fr 1fr;
   }
 
   .admin-wrap {
-    display: block;
+    display: flex;
   }
 
   .admin-sidebar {
-    position: static;
+    position: sticky;
     width: 100%;
     height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
   }
 
   .sb-nav {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
+    padding: 8px;
   }
 
   .sb-section,
   .sb-footer {
     display: none;
+  }
+
+  .sb-item {
+    margin: 4px;
+  }
+}
+
+@media (max-width: 768px) {
+  .grid-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .grid-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-sidebar {
+    width: 100%;
+  }
+
+  .sb-nav {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -1156,12 +1187,41 @@ textarea:focus {
     flex: 1;
     justify-content: center;
     padding: 0 8px;
+    font-size: 11px;
+  }
+
+  .topnav-inner {
+    gap: 12px;
+    height: auto;
+    min-height: 64px;
+    flex-wrap: wrap;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  .topnav-brand {
+    order: 1;
+  }
+
+  .topnav-links {
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .topnav-actions {
+    order: 2;
+    width: 100%;
   }
 
   .topnav-actions,
   .hero-stats,
   .profile-info {
     flex-direction: column;
+  }
+
+  .topnav-actions button {
+    width: 100%;
   }
 
   .grid-4,
@@ -1173,19 +1233,85 @@ textarea:focus {
 
   .hero-section {
     padding-top: 56px;
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-bottom: 40px;
+  }
+
+  .hero-h1 {
+    font-size: clamp(1.5rem, 4vw, 2rem);
+  }
+
+  .hero-sub {
+    font-size: 14px;
+  }
+
+  .hero-btns {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .hero-btn-primary,
+  .hero-btn-outline {
+    width: 100%;
+  }
+
+  .hero-stats {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .public-page-body,
+  .page-body {
+    padding: 24px 16px;
+  }
+
+  .auth-page {
+    padding: 16px 12px;
+  }
+
+  .auth-card {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-hero {
+    min-height: 280px;
+    padding: 24px;
+  }
+
+  .auth-panel {
+    padding: 24px;
+  }
+
+  .auth-hero h1 {
+    font-size: clamp(1.5rem, 4vw, 2rem);
+  }
+
+  .form-grid {
+    gap: 12px;
   }
 
   .admin-topbar {
     align-items: stretch;
     height: auto;
     flex-direction: column;
-    padding: 14px;
+    padding: 12px;
+    gap: 8px;
   }
 
-  .admin-topbar h1,
+  .admin-topbar h1 {
+    min-width: 0;
+    width: 100%;
+    font-size: 14px;
+  }
+
   .topbar-search {
     min-width: 0;
     width: 100%;
+  }
+
+  .topbar-search input {
+    font-size: 14px;
   }
 
   .topbar-notif {
@@ -1194,5 +1320,564 @@ textarea:focus {
 
   .sb-nav {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .sb-item {
+    min-height: 34px;
+    padding: 0 8px;
+    font-size: 11px;
+  }
+
+  .sb-item i {
+    font-size: 16px;
+  }
+
+  .sb-badge {
+    font-size: 9px;
+    padding: 1px 4px;
+  }
+
+  .card-header {
+    gap: 8px;
+    min-height: 48px;
+    padding: 12px;
+  }
+
+  .card-title {
+    font-size: 14px;
+  }
+
+  .card-title i {
+    font-size: 16px;
+  }
+
+  .card-body {
+    padding: 12px;
+  }
+
+  .metric-val {
+    font-size: 22px;
+  }
+
+  .metric-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+
+  .profile-header {
+    padding: 16px;
+    border-radius: 10px;
+  }
+
+  .avatar-xl {
+    width: 60px;
+    height: 60px;
+    font-size: 20px;
+  }
+
+  .profile-name {
+    font-size: 16px;
+  }
+
+  .profile-id {
+    font-size: 12px;
+  }
+
+  .profile-tags {
+    gap: 4px;
+  }
+
+  .profile-tags span {
+    font-size: 10px;
+    padding: 3px 7px;
+  }
+
+  table {
+    min-width: 100%;
+    font-size: 12px;
+  }
+
+  th,
+  td {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  .badge {
+    font-size: 10px;
+    min-height: 22px;
+    padding: 2px 7px;
+  }
+
+  .section-header h2 {
+    font-size: 18px;
+  }
+
+  .section-header p {
+    font-size: 13px;
+  }
+
+  .service-card {
+    padding: 16px;
+  }
+
+  .service-card h3 {
+    font-size: 14px;
+  }
+
+  .ann-card-img {
+    height: 100px;
+    font-size: 32px;
+  }
+
+  .ann-card-body {
+    padding: 12px;
+  }
+
+  .ann-tag {
+    font-size: 9px;
+    padding: 2px 6px;
+  }
+
+  .hotline-card {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .hotline-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+
+  .official-card {
+    padding: 14px;
+  }
+
+  .off-photo {
+    width: 56px;
+    height: 56px;
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+
+  .empty-state,
+  .report-card {
+    padding: 20px;
+  }
+
+  .empty-state > i {
+    font-size: 32px;
+  }
+
+  .toast-lite {
+    right: 12px;
+    left: 12px;
+    max-width: none;
+    font-size: 12px;
+    padding: 10px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    font-size: 13px;
+  }
+
+  body {
+    min-width: 320px;
+  }
+
+  .topnav-inner {
+    gap: 8px;
+    padding: 8px 12px;
+  }
+
+  .topnav-seal {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+
+  .topnav-title {
+    font-size: 12px;
+  }
+
+  .topnav-title span {
+    font-size: 9px;
+  }
+
+  .topnav-link {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+
+  .btn-outline-white,
+  .btn-white,
+  .btn,
+  .hero-btn-primary,
+  .hero-btn-outline {
+    min-height: 34px;
+    padding: 0 12px;
+    font-size: 11px;
+  }
+
+  .btn-sm {
+    min-height: 28px;
+    padding: 0 9px;
+    font-size: 10px;
+  }
+
+  .hero-section {
+    padding: 40px 12px 30px;
+  }
+
+  .hero-h1 {
+    font-size: 1.3rem;
+    margin-bottom: 12px;
+  }
+
+  .hero-eyebrow {
+    font-size: 11px;
+    margin-bottom: 14px;
+    padding: 4px 10px;
+  }
+
+  .hero-sub {
+    font-size: 13px;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  .hero-btns {
+    gap: 6px;
+  }
+
+  .hero-stat {
+    padding: 12px;
+  }
+
+  .hs-val {
+    font-size: 18px;
+  }
+
+  .hs-lbl {
+    font-size: 10px;
+  }
+
+  .public-page-body,
+  .page-body {
+    padding: 16px 12px;
+  }
+
+  .section-header h2 {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+
+  .section-header p {
+    font-size: 12px;
+  }
+
+  .grid-2,
+  .grid-3,
+  .grid-4 {
+    gap: 12px;
+  }
+
+  .card {
+    border-radius: 8px;
+  }
+
+  .card-header {
+    gap: 6px;
+    min-height: 44px;
+    padding: 10px;
+  }
+
+  .card-title {
+    font-size: 13px;
+  }
+
+  .card-title i {
+    font-size: 14px;
+  }
+
+  .card-body {
+    padding: 10px;
+  }
+
+  .service-card {
+    padding: 12px;
+    gap: 8px;
+  }
+
+  .service-card > i {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+
+  .service-card h3 {
+    font-size: 13px;
+  }
+
+  .service-card p {
+    font-size: 12px;
+  }
+
+  .ann-card-img {
+    height: 80px;
+    font-size: 28px;
+  }
+
+  .ann-tag {
+    font-size: 8px;
+    padding: 1px 5px;
+  }
+
+  .ann-meta {
+    font-size: 10px;
+  }
+
+  .official-card {
+    padding: 12px;
+  }
+
+  .official-card h3 {
+    font-size: 13px;
+  }
+
+  .official-card p {
+    font-size: 12px;
+  }
+
+  .off-photo {
+    width: 48px;
+    height: 48px;
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+
+  .hotline-card {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .hotline-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+
+  .hotline-card strong {
+    font-size: 14px;
+  }
+
+  .hotline-card p {
+    font-size: 12px;
+  }
+
+  .auth-page {
+    padding: 12px 8px;
+  }
+
+  .auth-hero {
+    min-height: 240px;
+    padding: 16px;
+  }
+
+  .auth-panel {
+    padding: 16px;
+  }
+
+  .auth-mark {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 12px;
+    font-size: 24px;
+  }
+
+  .auth-kicker {
+    font-size: 10px;
+    margin-bottom: 6px;
+  }
+
+  .auth-hero h1 {
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+  }
+
+  .auth-hero p:not(.auth-kicker) {
+    font-size: 13px;
+    margin-top: 12px;
+  }
+
+  .auth-back {
+    left: 12px;
+    top: 12px;
+    padding: 6px 10px;
+    font-size: 10px;
+  }
+
+  .auth-panel-title {
+    gap: 6px;
+    margin-bottom: 14px;
+    font-size: 14px;
+  }
+
+  .auth-panel-title i {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+
+  .form-grid {
+    gap: 10px;
+  }
+
+  .form-label {
+    gap: 4px;
+  }
+
+  .field span,
+  .form-label {
+    font-size: 11px;
+  }
+
+  input,
+  select,
+  textarea {
+    padding: 8px 10px;
+    font-size: 13px;
+    border-radius: 6px;
+  }
+
+  textarea {
+    min-height: 60px;
+  }
+
+  .profile-header {
+    padding: 12px;
+    border-radius: 8px;
+    gap: 10px;
+  }
+
+  .avatar-xl {
+    width: 50px;
+    height: 50px;
+    font-size: 18px;
+  }
+
+  .profile-name {
+    font-size: 14px;
+  }
+
+  .profile-id {
+    font-size: 11px;
+  }
+
+  .metric-val {
+    font-size: 18px;
+  }
+
+  .metric-lbl {
+    font-size: 11px;
+  }
+
+  .metric-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+
+  .metric-card {
+    padding: 12px;
+  }
+
+  .mt-4 {
+    margin-top: 12px;
+  }
+
+  table {
+    font-size: 11px;
+  }
+
+  th,
+  td {
+    padding: 6px 8px;
+    white-space: nowrap;
+  }
+
+  .badge {
+    font-size: 9px;
+    min-height: 20px;
+    padding: 1px 5px;
+  }
+
+  .form-error {
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+
+  .sb-item {
+    min-height: 32px;
+    font-size: 10px;
+    gap: 6px;
+  }
+
+  .sb-badge {
+    font-size: 8px;
+    padding: 1px 3px;
+  }
+
+  .sb-item i {
+    font-size: 14px;
+  }
+
+  .admin-topbar {
+    padding: 10px;
+    gap: 6px;
+  }
+
+  .admin-topbar h1 {
+    font-size: 13px;
+    margin: 0;
+  }
+
+  .topbar-search input {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  .topbar-search i {
+    left: 8px;
+  }
+
+  .empty-state,
+  .report-card {
+    padding: 16px;
+    gap: 8px;
+  }
+
+  .empty-state > i {
+    font-size: 28px;
+  }
+
+  .empty-state h3,
+  .report-card h3 {
+    font-size: 14px;
+  }
+
+  .empty-state p,
+  .report-card p {
+    font-size: 12px;
+  }
+
+  .toast-lite {
+    bottom: 68px;
+    font-size: 11px;
+    padding: 8px 10px;
   }
 }
