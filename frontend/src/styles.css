@@ -107,6 +107,8 @@ button {
   background: transparent;
   color: #ffffff;
   text-align: left;
+  z-index: 101;
+  position: relative;
 }
 
 .topnav-seal {
@@ -118,6 +120,22 @@ button {
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.15);
   font-size: 18px;
+}
+
+.topnav-hamburger {
+  display: none;
+  background: transparent;
+  color: #ffffff;
+  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  margin-left: auto;
+  margin-right: 8px;
+  z-index: 102;
 }
 
 .topnav-title {
@@ -140,6 +158,28 @@ button {
   flex: 1;
   gap: 2px;
   min-width: 0;
+}
+
+.topnav-links-mobile {
+  display: none;
+  position: absolute;
+  top: 64px;
+  left: 0;
+  right: 0;
+  background: rgba(15, 61, 38, 0.98);
+  flex-direction: column;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 100;
+  backdrop-filter: blur(10px);
+}
+
+.topnav-links-mobile .topnav-link {
+  width: 100%;
+  border-radius: 0;
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 13px;
 }
 
 .topnav-link {
@@ -1102,17 +1142,37 @@ textarea:focus {
 
 @media (max-width: 980px) {
   .topnav-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     height: auto;
     min-height: 64px;
-    flex-wrap: wrap;
-    padding-top: 12px;
-    padding-bottom: 12px;
+    padding: 12px 16px;
+  }
+
+  .topnav-brand {
+    order: 1;
+    flex-shrink: 0;
+  }
+
+  .topnav-hamburger {
+    display: flex;
+    order: 2;
   }
 
   .topnav-links {
+    display: none;
     order: 3;
     width: 100%;
-    overflow-x: auto;
+  }
+
+  .topnav-links-mobile {
+    display: flex;
+  }
+
+  .topnav-actions {
+    order: 4;
+    flex-shrink: 0;
   }
 
   .grid-4 {
@@ -1175,6 +1235,42 @@ textarea:focus {
 }
 
 @media (max-width: 680px) {
+  .topnav-inner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    height: auto;
+    min-height: 64px;
+  }
+
+  .topnav-brand {
+    order: 1;
+    flex-shrink: 0;
+  }
+
+  .topnav-hamburger {
+    display: flex;
+    order: 2;
+  }
+
+  .topnav-links {
+    display: none;
+  }
+
+  .topnav-links-mobile {
+    display: flex;
+  }
+
+  .topnav-actions {
+    order: 3;
+    flex-shrink: 0;
+  }
+
+  .topnav-actions button {
+    margin-left: 0;
+  }
+
   .portal-switcher {
     left: 12px;
     right: 12px;

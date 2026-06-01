@@ -170,10 +170,7 @@ function PublicPortal({ activePage, data, openLogin, openRegister, setActivePage
     <div className="portal">
       <TopNav
         actions={
-          <>
-            <button className="btn-outline-white" onClick={openLogin} type="button">Login</button>
-            <button className="btn-white" onClick={openRegister} type="button">Register</button>
-          </>
+          <button className="btn-outline-white" onClick={openLogin} type="button">Login</button>
         }
         activePage={activePage}
         brandSub="Official Website"
@@ -653,13 +650,31 @@ function SimpleAdmin({ icon, rows, title }) {
 }
 
 function TopNav({ activePage, actions, brandSub, pages, setActivePage }) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <header className="topnav">
       <div className="topnav-inner">
-        <button className="topnav-brand" onClick={() => setActivePage(pages[0])} type="button">
+        <button className="topnav-brand" onClick={() => { setActivePage(pages[0]); setMobileMenuOpen(false); }} type="button">
           <div className="topnav-seal"><i className="ti ti-building-community" /></div>
           <div className="topnav-title">Barangay System<span>{brandSub}</span></div>
         </button>
+        <button className="topnav-hamburger" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} type="button">
+          <i className="ti ti-menu-2" />
+        </button>
+        {mobileMenuOpen && (
+          <nav className="topnav-links-mobile">
+            {pages.map((page) => (
+              <button 
+                className={activePage === page ? 'topnav-link active' : 'topnav-link'} 
+                key={page} 
+                onClick={() => { setActivePage(page); setMobileMenuOpen(false); }} 
+                type="button">
+                {page}
+              </button>
+            ))}
+          </nav>
+        )}
         <nav className="topnav-links">
           {pages.map((page) => (
             <button className={activePage === page ? 'topnav-link active' : 'topnav-link'} key={page} onClick={() => setActivePage(page)} type="button">{page}</button>
