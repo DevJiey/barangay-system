@@ -673,6 +673,7 @@ function TopNav({ activePage, actions, brandSub, pages, setActivePage }) {
                 {page}
               </button>
             ))}
+            <div className="topnav-links-mobile-actions">{actions}</div>
           </nav>
         )}
         <nav className="topnav-links">
