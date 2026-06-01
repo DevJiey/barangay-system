@@ -30,6 +30,7 @@ function App() {
   const [user, setUser] = useState(storedUser);
   const [data, setData] = useState(emptyData);
   const [notice, setNotice] = useState('');
+  const [loadingScreen, setLoadingScreen] = useState({ active: false, text: '' });
 
   useEffect(() => {
     refreshPublicData().catch(() => setNotice('Backend is not reachable yet.'));
@@ -104,10 +105,35 @@ function App() {
     setPortal('auth');
   }
 
+  function navigateWithLoading(action, text = 'Loading...') {
+    setLoadingScreen({ active: true, text });
+    window.setTimeout(() => {
+      action();
+      window.setTimeout(() => setLoadingScreen({ active: false, text: '' }), 260);
+    }, 360);
+  }
+
+  function changePublicPage(page) {
+    if (page === publicPage) return;
+    navigateWithLoading(() => setPublicPage(page), 'Loading page...');
+  }
+
+  function changeResidentPage(page) {
+    if (page === residentPage) return;
+    navigateWithLoading(() => setResidentPage(page), 'Opening section...');
+  }
+
+  function changeAdminPage(page) {
+    if (page === adminPage) return;
+    navigateWithLoading(() => setAdminPage(page), 'Opening admin page...');
+  }
+
   function logout() {
-    setUser(null);
-    localStorage.removeItem('barangay_user');
-    setPortal('public');
+    navigateWithLoading(() => {
+      setUser(null);
+      localStorage.removeItem('barangay_user');
+      setPortal('public');
+    }, 'Signing out...');
   }
 
   return (
@@ -124,7 +150,7 @@ function App() {
             setAuthMode('register');
             setPortal('auth');
           }}
-          setActivePage={setPublicPage}
+          setActivePage={changePublicPage}
         />
       )}
 
@@ -145,7 +171,7 @@ function App() {
           data={data}
           onIncidentCreated={() => refreshResidentData()}
           onRequestCreated={() => refreshResidentData()}
-          setActivePage={setResidentPage}
+          setActivePage={changeResidentPage}
           user={user}
           logout={logout}
         />
@@ -161,11 +187,12 @@ function App() {
           data={data}
           logout={logout}
           refreshData={refreshAdminData}
-          setActivePage={setAdminPage}
+          setActivePage={changeAdminPage}
           user={user}
         />
       )}
 
+      <LoadingScreen active={loadingScreen.active} text={loadingScreen.text} />
       {notice && <div className="toast-lite">{notice}</div>}
     </div>
   );
@@ -184,7 +211,7 @@ function PublicPortal({ activePage, data, openLogin, openRegister, setActivePage
         setActivePage={setActivePage}
       />
 
-      {activePage === 'Home' && <PublicHome data={data} openLogin={openLogin} />}
+      {activePage === 'Home' && <PublicHome data={data} openLogin={openLogin} openServices={() => setActivePage('Services')} />}
       {activePage === 'Services' && <ServicesPage openLogin={openLogin} />}
       {activePage === 'Announcements' && <AnnouncementsPage announcements={data.announcements} />}
       {activePage === 'Officials' && <OfficialsPage officials={data.officials} />}
@@ -193,7 +220,7 @@ function PublicPortal({ activePage, data, openLogin, openRegister, setActivePage
   );
 }
 
-function PublicHome({ data, openLogin }) {
+function PublicHome({ data, openLogin, openServices }) {
   return (
     <>
       <section className="hero-section">
@@ -205,7 +232,7 @@ function PublicHome({ data, openLogin }) {
           </p>
           <div className="hero-btns">
             <button className="hero-btn-primary" onClick={openLogin} type="button">Open Resident Portal</button>
-            <button className="hero-btn-outline" type="button">View Services</button>
+            <button className="hero-btn-outline" onClick={openServices} type="button">View Services</button>
           </div>
           <div className="hero-stats">
             <Stat value={data.residents.length} label="Residents" />
@@ -618,8 +645,6 @@ function AdminPortal({ activePage, data, logout, refreshData, setActivePage, use
       <main className="admin-main">
         <header className="admin-topbar">
           <h1>{activePage}</h1>
-          <div className="topbar-search"><i className="ti ti-search" /><input placeholder="Search records..." /></div>
-          <button className="btn btn-secondary btn-sm" onClick={refreshData} type="button">Refresh</button>
           <button className="btn btn-primary btn-sm" onClick={logout} type="button">Logout</button>
         </header>
         <div className="page-body">
@@ -933,6 +958,19 @@ function RequestTable({ admin = false, onReview, requests = [] }) {
 
 function EmptyState({ icon, text }) {
   return <div className="empty-state"><i className={icon} /><p>{text}</p></div>;
+}
+
+function LoadingScreen({ active, text }) {
+  if (!active) return null;
+
+  return (
+    <div className="loading-screen" role="status" aria-live="polite">
+      <div className="loading-card">
+        <div className="loading-spinner" />
+        <span>{text}</span>
+      </div>
+    </div>
+  );
 }
 
 function SectionHeader({ title, text }) {
