@@ -682,13 +682,13 @@ function ResidentsAdmin({ residents }) {
 
 function DocRequestsAdmin({ refreshData, requests }) {
   const [selectedRequest, setSelectedRequest] = useState(null);
-  const [status, setStatus] = useState('Under Review');
+  const [status, setStatus] = useState('Pending');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
   function reviewRequest(request) {
     setSelectedRequest(request);
-    setStatus(request.status || 'Under Review');
+    setStatus(request.status || 'Pending');
     setError('');
   }
 
@@ -726,8 +726,6 @@ function DocRequestsAdmin({ refreshData, requests }) {
               <FormLabel label="Status">
                 <select value={status} onChange={(event) => setStatus(event.target.value)}>
                   <option>Pending</option>
-                  <option>Under Review</option>
-                  <option>For Requirements</option>
                   <option>Approved</option>
                   <option>Released</option>
                   <option>Rejected</option>
@@ -793,10 +791,9 @@ function IncidentsAdmin({ incidents, refreshData }) {
                   <td><Badge text={item.status || 'Pending'} /></td>
                   <td>{formatDate(item.created_at)}</td>
                   <td>
-                    <div className="table-actions">
-                      <button className="btn btn-secondary btn-sm" disabled={saving} onClick={() => updateIncidentStatus(item.id, 'Under Review')} type="button">Review</button>
-                      <button className="btn btn-secondary btn-sm" disabled={saving} onClick={() => updateIncidentStatus(item.id, 'Resolved')} type="button">Resolve</button>
-                    </div>
+                    <button className="btn btn-secondary btn-sm" disabled={saving} onClick={() => updateIncidentStatus(item.id, 'Resolved')} type="button">
+                      Resolve
+                    </button>
                   </td>
                 </tr>
               ))}
