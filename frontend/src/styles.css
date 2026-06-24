@@ -1316,21 +1316,29 @@ textarea:focus {
   }
 
   .admin-wrap {
-    display: flex;
+    flex-direction: column;
   }
 
   .admin-sidebar {
     position: sticky;
+    z-index: 90;
     width: 100%;
     height: auto;
     border-right: none;
     border-bottom: 1px solid var(--border);
   }
 
+  .sb-logo {
+    padding: 12px 16px;
+  }
+
   .sb-nav {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    padding: 8px;
+    flex: none;
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 8px 12px;
+    scrollbar-width: thin;
   }
 
   .sb-section,
@@ -1339,7 +1347,16 @@ textarea:focus {
   }
 
   .sb-item {
-    margin: 4px;
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 116px;
+    margin: 0;
+    justify-content: center;
+    white-space: nowrap;
+  }
+
+  .admin-topbar {
+    position: static;
   }
 }
 
@@ -1357,7 +1374,7 @@ textarea:focus {
   }
 
   .sb-nav {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    display: flex;
   }
 }
 
@@ -1562,7 +1579,7 @@ textarea:focus {
   }
 
   .sb-nav {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: flex;
   }
 
   .sb-item {
