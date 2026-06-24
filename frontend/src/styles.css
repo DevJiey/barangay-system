@@ -1083,9 +1083,20 @@ textarea:focus {
 .sb-logo {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
   border-bottom: 1px solid var(--border);
   padding: 18px 16px 14px;
+}
+
+.sb-brand-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  background: transparent;
+  color: var(--text-1);
+  text-align: left;
 }
 
 .sb-seal {
@@ -1106,6 +1117,17 @@ textarea:focus {
   color: var(--text-2);
   font-size: 10px;
   font-weight: 500;
+}
+
+.sb-menu-toggle {
+  display: none;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: var(--brand-light);
+  color: var(--brand);
+  font-size: 22px;
 }
 
 .sb-nav {
@@ -1332,13 +1354,19 @@ textarea:focus {
     padding: 12px 16px;
   }
 
+  .sb-menu-toggle {
+    display: grid;
+  }
+
   .sb-nav {
     flex: none;
-    display: flex;
+    display: none;
+    padding: 8px 12px 12px;
+  }
+
+  .sb-nav.open {
+    display: grid;
     gap: 6px;
-    overflow-x: auto;
-    padding: 8px 12px;
-    scrollbar-width: thin;
   }
 
   .sb-section,
@@ -1347,11 +1375,10 @@ textarea:focus {
   }
 
   .sb-item {
-    flex: 0 0 auto;
-    width: auto;
-    min-width: 116px;
+    width: 100%;
+    min-width: 0;
     margin: 0;
-    justify-content: center;
+    justify-content: flex-start;
     white-space: nowrap;
   }
 
@@ -1374,7 +1401,11 @@ textarea:focus {
   }
 
   .sb-nav {
-    display: flex;
+    display: none;
+  }
+
+  .sb-nav.open {
+    display: grid;
   }
 }
 
@@ -1579,7 +1610,11 @@ textarea:focus {
   }
 
   .sb-nav {
-    display: flex;
+    display: none;
+  }
+
+  .sb-nav.open {
+    display: grid;
   }
 
   .sb-item {

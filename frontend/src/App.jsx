@@ -618,17 +618,34 @@ function IncidentForm({ onCreated, user }) {
 }
 
 function AdminPortal({ activePage, data, logout, refreshData, setActivePage, user }) {
+  const [adminMenuOpen, setAdminMenuOpen] = useState(false);
+
+  function openAdminPage(page) {
+    setActivePage(page);
+    setAdminMenuOpen(false);
+  }
+
   return (
     <div className="admin-wrap">
       <aside className="admin-sidebar">
         <div className="sb-logo">
-          <div className="sb-seal"><i className="ti ti-building-community" /></div>
-          <div className="sb-brand">Barangay BMS<span>Admin Console</span></div>
+          <button className="sb-brand-btn" onClick={() => openAdminPage('Dashboard')} type="button">
+            <div className="sb-seal"><i className="ti ti-building-community" /></div>
+            <div className="sb-brand">Barangay BMS<span>Admin Console</span></div>
+          </button>
+          <button
+            aria-label="Toggle admin menu"
+            className="sb-menu-toggle"
+            onClick={() => setAdminMenuOpen((current) => !current)}
+            type="button"
+          >
+            <i className={adminMenuOpen ? 'ti ti-x' : 'ti ti-menu-2'} />
+          </button>
         </div>
-        <nav className="sb-nav">
+        <nav className={adminMenuOpen ? 'sb-nav open' : 'sb-nav'}>
           <p className="sb-section">Main Menu</p>
           {adminPages.map((page) => (
-            <button className={activePage === page ? 'sb-item active' : 'sb-item'} key={page} onClick={() => setActivePage(page)} type="button">
+            <button className={activePage === page ? 'sb-item active' : 'sb-item'} key={page} onClick={() => openAdminPage(page)} type="button">
               <i className={adminIcon(page)} />
               <span>{page}</span>
               {page === 'Doc Requests' && data.requests.length > 0 && <span className="sb-badge">{data.requests.length}</span>}
